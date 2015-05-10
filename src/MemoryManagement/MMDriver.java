@@ -9,7 +9,7 @@ package MemoryManagement;
 public class MMDriver {
 	public static void main(String args[])
 	{
-		Display display = new Display();
+		Animation display = new Animation();
 		display.setVisible(true);
 	}
 }
