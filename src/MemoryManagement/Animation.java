@@ -80,24 +80,59 @@ public class Animation extends JFrame {
 	private void animate(){
 		//can be set lower, but more waiting will have to happen
 		//due to random size processes being created
-		while(remainingSize >= 4){
-			Process process = createRandomProcess();
+		while(true)
+		{
+			//Allocating in the animation.
+			while(remainingSize >= 4){
+				Process process = createRandomProcess();
 
-			mm.allocate(process);
-			for(int i = 0; i<mm.getProcesses().size(); i++)
-			{
-				if(mm.getProcesses().get(i).getLp() != null)
-					remainingSize -= mm.getProcesses().get(i).getSize();
+				mm.allocate(process);
+				for(int i = 0; i<mm.getProcesses().size(); i++)
+				{
+					if(mm.getProcesses().get(i).getLp() != null)
+						remainingSize -= mm.getProcesses().get(i).getSize();
+				}
+				listModel.addElement(process.getName() + ", " + process.getSize());
+				repaint();
+			
+				setVisible(true);
+			
+				try {
+					Thread.sleep(1000);
+				} catch(InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
 			}
-			listModel.addElement(process.getName() + ", " + process.getSize());
-			repaint();
-			
-			setVisible(true);
-			
-			try {
-			    Thread.sleep(1000);
-			} catch(InterruptedException ex) {
-			    Thread.currentThread().interrupt();
+			//Deallocating in the animation.
+			while(remainingSize <= 64)
+			{	
+				//Get the index to be removed.
+				int index = getRandomIndex();
+				
+				//Create a local variable.
+				Process proc = mm.getProcesses().get(index).getLp();
+				
+				//Check to see if there actually is a process associated
+				//with the random index.
+				if(proc != null)
+				{
+					//increase the remaining size.
+					remainingSize += proc.getSize();
+					//deallocate the process from the tree
+					mm.deallocate(proc);
+				}
+				
+				//update the gui
+				listModel.removeElement(proc);
+				repaint();
+				
+				setVisible(true);
+				
+				try {
+					Thread.sleep(1000);
+				} catch(InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
 			}
 		}
 	}
@@ -118,5 +153,18 @@ public class Animation extends JFrame {
 		} while(remainingSize < adjustedSize);
 
 			return p;
+	}
+	
+	/**
+	 * Generates a random number between 0 and the number of
+	 * leaves in the tree.
+	 * @return An integer representing the index of the leaves
+	 * array to be deallocated.
+	 */
+	private int getRandomIndex()
+	{
+		Random r = new Random();
+		int index = r.nextInt(mm.getProcesses().size());
+		return index;
 	}
 }
